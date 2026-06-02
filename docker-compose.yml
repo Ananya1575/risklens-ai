@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  risklens:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: risklens_ai
+    ports:
+      - "8501:8501"
+    volumes:
+      # Mount data folder — dataset stays on your machine, not in image
+      - ./data:/app/data
+      # Mount models folder — use pre-trained model, no retraining needed
+      - ./models:/app/models
+      # Mount documents folder — EDA and SHAP charts
+      - ./documents:/app/documents
+      # Mount sql folder — SQLite database file
+      - ./sql:/app/sql
+    env_file:
+      - .env
+    environment:
+      - PYTHONPATH=/app
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
